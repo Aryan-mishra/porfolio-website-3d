@@ -123,7 +123,7 @@ export default function Contact() {
               
               <div className="space-y-2 border-t border-white/10 pt-4">
                 <span className="text-xs font-mono text-gray-500 block">ENCRYPTION: AES-256</span>
-                <span className="text-xs font-mono text-gray-500 block">LOCATION: RAVAN-JI // INDIA</span>
+                <span className="text-xs font-mono text-gray-500 block">LOCATION: MISHRA JI // INDIA</span>
                 <span className="text-xs font-mono text-gray-500 block">COGNITIVE_LOAD: OPTIMIZED</span>
               </div>
             </div>

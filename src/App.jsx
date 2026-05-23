@@ -59,7 +59,7 @@ export default function App() {
       {/* Footer */}
       <footer className="py-12 border-t border-white/5 bg-[#030712]/60 backdrop-blur-md relative z-10 text-center text-xs font-mono text-gray-500 space-y-3">
         <div>
-          <span>RAVANJI &bull; PORTFOLIO 2026 // POWERED_BY_AI</span>
+          <span>MISHRA JI &bull; PORTFOLIO 2026 // POWERED_BY_AI</span>
         </div>
         <div className="text-[10px] text-gray-600">
           Built with React &bull; Tailwind CSS &bull; Three.js &bull; Framer Motion

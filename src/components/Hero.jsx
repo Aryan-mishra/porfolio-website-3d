@@ -56,7 +56,7 @@ export default function Hero() {
             variants={itemVariants}
             className="text-4xl sm:text-5xl md:text-6xl font-bold font-display tracking-tight text-white leading-[1.1] select-none"
           >
-            Hey.. <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-blue-400 to-indigo-400 text-glow-teal">Ravanji</span>
+            Hey.. <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-blue-400 to-indigo-400 text-glow-teal">Mishra Ji</span>
           </motion.h1>
 
           {/* Persona Subheading */}

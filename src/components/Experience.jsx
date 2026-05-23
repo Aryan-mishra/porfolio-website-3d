@@ -68,7 +68,7 @@ export default function Experience() {
         {timelineData.map((item, idx) => {
           const isLeft = idx % 2 === 0;
           return (
-            <div key={idx} className="relative flex flex-col md:flex-row md:items-center">
+            <div key={idx} className={`relative flex flex-col md:flex-row md:items-center ${isLeft ? '' : 'md:flex-row-reverse'}`}>
               
               {/* Timeline dot/node */}
               <div className="absolute -left-[9px] md:left-1/2 md:-translate-x-1/2 top-1.5 md:top-auto z-10 w-[18px] h-[18px] rounded-full bg-[#030712] border-2 border-teal-400 flex items-center justify-center shadow-[0_0_10px_rgba(45,212,191,0.6)]">
