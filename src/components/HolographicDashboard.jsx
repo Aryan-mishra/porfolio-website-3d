@@ -18,6 +18,7 @@ function BarChart3D() {
   ];
 
   useFrame((state) => {
+    if (!groupRef.current || !bars.current) return;
     const time = state.clock.getElapsedTime();
     bars.current.forEach((bar, idx) => {
       if (bar) {
@@ -87,6 +88,7 @@ function LineChart3D() {
   const lineRef = useRef();
 
   useFrame((state) => {
+    if (!lineRef.current) return;
     const time = state.clock.getElapsedTime();
     lineRef.current.rotation.y = time * 0.15;
   });

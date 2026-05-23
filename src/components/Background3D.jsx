@@ -18,8 +18,10 @@ function Particles({ count = 100 }) {
   }, [count]);
 
   useFrame((state) => {
+    if (!points.current) return;
     const time = state.clock.getElapsedTime();
-    const pos = points.current.geometry.attributes.position;
+    const pos = points.current.geometry?.attributes?.position;
+    if (!pos) return;
     
     // Slow anti-gravity upward drift
     for (let i = 0; i < count; i++) {
@@ -60,6 +62,7 @@ function OrbitingRings() {
   const groupRef = useRef();
 
   useFrame((state) => {
+    if (!groupRef.current) return;
     const time = state.clock.getElapsedTime();
     groupRef.current.rotation.x = time * 0.04;
     groupRef.current.rotation.y = time * 0.06;
@@ -161,6 +164,7 @@ function SceneContent() {
   }, []);
 
   useFrame(() => {
+    if (!sceneRef.current) return;
     const targetX = mouseRef.current.x * 0.3;
     const targetY = mouseRef.current.y * 0.3;
     
