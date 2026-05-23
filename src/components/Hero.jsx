@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, FileText, Send } from 'lucide-react';
-import HolographicDashboard from './HolographicDashboard';
+
+const HolographicDashboard = lazy(() => import('./HolographicDashboard'));
 
 export default function Hero() {
   const containerVariants = {
@@ -106,7 +107,14 @@ export default function Hero() {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
-          <HolographicDashboard />
+          <Suspense fallback={
+            <div className="relative w-full h-[320px] md:h-[400px] glass-panel rounded-2xl overflow-hidden flex flex-col items-center justify-center border border-teal-500/10 bg-[#030712]/40 backdrop-blur-sm">
+              <span className="w-8 h-8 rounded-full border-2 border-teal-500/30 border-t-teal-400 animate-spin mb-3" />
+              <span className="text-[10px] font-mono text-teal-400/70 uppercase tracking-widest animate-pulse">Initializing Hologram...</span>
+            </div>
+          }>
+            <HolographicDashboard />
+          </Suspense>
         </motion.div>
 
       </div>

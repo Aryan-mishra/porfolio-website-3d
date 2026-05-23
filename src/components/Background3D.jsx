@@ -58,7 +58,7 @@ function Particles({ count = 100 }) {
   );
 }
 
-function OrbitingRings() {
+function OrbitingRings({ isMobile }) {
   const groupRef = useRef();
 
   useFrame((state) => {
@@ -72,43 +72,65 @@ function OrbitingRings() {
     <group ref={groupRef}>
       {/* Primary Ring */}
       <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[3, 0.015, 8, 100]} />
+        <torusGeometry args={[3, 0.015, 8, isMobile ? 40 : 100]} />
         <meshBasicMaterial color="#60a5fa" transparent opacity={0.2} />
       </mesh>
       
       {/* Secondary Outer Ring */}
       <mesh rotation={[Math.PI / 4, Math.PI / 4, 0]}>
-        <torusGeometry args={[4.5, 0.008, 6, 80]} />
+        <torusGeometry args={[4.5, 0.008, 6, isMobile ? 30 : 80]} />
         <meshBasicMaterial color="#2dd4bf" transparent opacity={0.15} />
       </mesh>
       
-      {/* Tertiary Inner Ring */}
-      <mesh rotation={[-Math.PI / 6, -Math.PI / 3, 0]}>
-        <torusGeometry args={[2.0, 0.01, 8, 60]} />
-        <meshBasicMaterial color="#a78bfa" transparent opacity={0.2} />
-      </mesh>
+      {/* Tertiary Inner Ring - Disabled on Mobile to save vertex calculations */}
+      {!isMobile && (
+        <mesh rotation={[-Math.PI / 6, -Math.PI / 3, 0]}>
+          <torusGeometry args={[2.0, 0.01, 8, 60]} />
+          <meshBasicMaterial color="#a78bfa" transparent opacity={0.2} />
+        </mesh>
+      )}
     </group>
   );
 }
 
-function FloatingShapes() {
+function FloatingShapes({ isMobile }) {
+  // Common material wrapper to replace expensive refraction on mobile
+  const ShapeMaterial = ({ color, emissive, opacity }) => {
+    if (isMobile) {
+      return (
+        <meshStandardMaterial
+          color={color}
+          emissive={emissive}
+          emissiveIntensity={0.1}
+          roughness={0.2}
+          metalness={0.7}
+          transparent
+          opacity={opacity + 0.1}
+        />
+      );
+    }
+    return (
+      <meshPhysicalMaterial
+        color={color}
+        emissive={emissive}
+        emissiveIntensity={0.15}
+        roughness={0.1}
+        metalness={0.8}
+        transparent
+        opacity={opacity}
+        transmission={0.6}
+        thickness={0.5}
+      />
+    );
+  };
+
   return (
     <group>
       {/* Floating Tetrahedron */}
       <Float speed={1.5} rotationIntensity={1} floatIntensity={0.8} position={[-4, 2, -2]}>
         <mesh>
           <tetrahedronGeometry args={[0.5]} />
-          <meshPhysicalMaterial
-            color="#2dd4bf"
-            emissive="#0d9488"
-            emissiveIntensity={0.15}
-            roughness={0.1}
-            metalness={0.8}
-            transparent
-            opacity={0.25}
-            transmission={0.6}
-            thickness={0.5}
-          />
+          <ShapeMaterial color="#2dd4bf" emissive="#0d9488" opacity={0.25} />
         </mesh>
       </Float>
 
@@ -116,40 +138,32 @@ function FloatingShapes() {
       <Float speed={1.2} rotationIntensity={1.5} floatIntensity={1} position={[4.5, -2, -1]}>
         <mesh>
           <octahedronGeometry args={[0.4]} />
-          <meshPhysicalMaterial
-            color="#60a5fa"
-            emissive="#2563eb"
-            emissiveIntensity={0.15}
-            roughness={0.2}
-            metalness={0.9}
-            transparent
-            opacity={0.2}
-            transmission={0.7}
-            thickness={0.8}
-          />
+          <ShapeMaterial color="#60a5fa" emissive="#2563eb" opacity={0.2} />
         </mesh>
       </Float>
 
-      {/* Floating Icosahedron */}
-      <Float speed={2} rotationIntensity={0.8} floatIntensity={1.2} position={[-2.5, -3, -3]}>
-        <mesh>
-          <icosahedronGeometry args={[0.35]} />
-          <meshPhysicalMaterial
-            color="#a78bfa"
-            emissive="#7c3aed"
-            emissiveIntensity={0.2}
-            roughness={0.15}
-            transparent
-            opacity={0.25}
-            transmission={0.8}
-          />
-        </mesh>
-      </Float>
+      {/* Floating Icosahedron - Disabled on Mobile */}
+      {!isMobile && (
+        <Float speed={2} rotationIntensity={0.8} floatIntensity={1.2} position={[-2.5, -3, -3]}>
+          <mesh>
+            <icosahedronGeometry args={[0.35]} />
+            <meshPhysicalMaterial
+              color="#a78bfa"
+              emissive="#7c3aed"
+              emissiveIntensity={0.2}
+              roughness={0.15}
+              transparent
+              opacity={0.25}
+              transmission={0.8}
+            />
+          </mesh>
+        </Float>
+      )}
     </group>
   );
 }
 
-function SceneContent() {
+function SceneContent({ isMobile }) {
   const sceneRef = useRef();
   const mouseRef = useRef({ x: 0, y: 0 });
 
@@ -177,24 +191,40 @@ function SceneContent() {
     <group ref={sceneRef}>
       <ambientLight intensity={0.5} />
       <directionalLight position={[5, 8, 5]} intensity={1.2} color="#60a5fa" />
-      <pointLight position={[-8, -8, -5]} intensity={0.6} color="#2dd4bf" />
+      {/* Secondary light disabled on mobile to conserve performance */}
+      {!isMobile && <pointLight position={[-8, -8, -5]} intensity={0.6} color="#2dd4bf" />}
       
-      <OrbitingRings />
-      <FloatingShapes />
-      <Particles count={120} />
-      <Stars radius={100} depth={50} count={1200} factor={4} saturation={0.5} fade speed={0.8} />
+      <OrbitingRings isMobile={isMobile} />
+      <FloatingShapes isMobile={isMobile} />
+      <Particles count={isMobile ? 35 : 120} />
+      <Stars radius={100} depth={50} count={isMobile ? 250 : 1200} factor={isMobile ? 3 : 4} saturation={0.5} fade speed={isMobile ? 0.4 : 0.8} />
     </group>
   );
 }
 
 export default function Background3D() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 768px)');
+    setIsMobile(media.matches);
+    const listener = (e) => setIsMobile(e.matches);
+    media.addEventListener('change', listener);
+    return () => media.removeEventListener('change', listener);
+  }, []);
+
   return (
     <div className="fixed inset-0 -z-50 w-full h-full bg-[#030712] overflow-hidden pointer-events-none">
       <Canvas
         camera={{ position: [0, 0, 7], fov: 60 }}
-        gl={{ antialias: true, alpha: false }}
+        gl={{ 
+          antialias: !isMobile, 
+          alpha: false, 
+          powerPreference: 'high-performance'
+        }}
+        dpr={isMobile ? [1, 1.2] : [1, 1.5]}
       >
-        <SceneContent />
+        <SceneContent isMobile={isMobile} />
       </Canvas>
       {/* Background glow overlay */}
       <div className="absolute inset-0 bg-mesh opacity-80 pointer-events-none" />

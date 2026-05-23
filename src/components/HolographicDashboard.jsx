@@ -1,10 +1,10 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float } from '@react-three/drei';
 import * as THREE from 'three';
 
 // An animated 3D bar chart
-function BarChart3D() {
+function BarChart3D({ isMobile }) {
   const groupRef = useRef();
   const bars = useRef([]);
 
@@ -45,16 +45,28 @@ function BarChart3D() {
           position={[data.x, 0, 0]}
         >
           <boxGeometry args={[0.3, 2, 0.3]} />
-          <meshPhysicalMaterial
-            color={data.color}
-            emissive={data.color}
-            emissiveIntensity={0.2}
-            roughness={0.1}
-            metalness={0.8}
-            transparent
-            opacity={0.7}
-            transmission={0.5}
-          />
+          {isMobile ? (
+            <meshStandardMaterial
+              color={data.color}
+              emissive={data.color}
+              emissiveIntensity={0.3}
+              roughness={0.2}
+              metalness={0.7}
+              transparent
+              opacity={0.85}
+            />
+          ) : (
+            <meshPhysicalMaterial
+              color={data.color}
+              emissive={data.color}
+              emissiveIntensity={0.2}
+              roughness={0.1}
+              metalness={0.8}
+              transparent
+              opacity={0.7}
+              transmission={0.5}
+            />
+          )}
         </mesh>
       ))}
 
@@ -68,7 +80,7 @@ function BarChart3D() {
 }
 
 // Glowing line chart connecting nodes
-function LineChart3D() {
+function LineChart3D({ isMobile }) {
   const points = useMemo(() => {
     const pts = [];
     pts.push(new THREE.Vector3(-1.8, -0.8, 0.5));
@@ -95,23 +107,34 @@ function LineChart3D() {
 
   return (
     <group ref={lineRef}>
-      {/* Curved tube line */}
+      {/* Curved tube line - less detailed segments on mobile */}
       <mesh>
-        <tubeGeometry args={[curve, 64, 0.04, 8, false]} />
-        <meshPhysicalMaterial
-          color="#3b82f6"
-          emissive="#2563eb"
-          emissiveIntensity={0.8}
-          roughness={0.1}
-          transparent
-          opacity={0.8}
-        />
+        <tubeGeometry args={[curve, isMobile ? 32 : 64, 0.04, isMobile ? 5 : 8, false]} />
+        {isMobile ? (
+          <meshStandardMaterial
+            color="#3b82f6"
+            emissive="#2563eb"
+            emissiveIntensity={0.8}
+            roughness={0.2}
+            transparent
+            opacity={0.9}
+          />
+        ) : (
+          <meshPhysicalMaterial
+            color="#3b82f6"
+            emissive="#2563eb"
+            emissiveIntensity={0.8}
+            roughness={0.1}
+            transparent
+            opacity={0.8}
+          />
+        )}
       </mesh>
 
-      {/* Nodes on the line */}
+      {/* Nodes on the line - less detailed spheres on mobile */}
       {points.map((pt, idx) => (
         <mesh key={idx} position={pt}>
-          <sphereGeometry args={[0.08, 16, 16]} />
+          <sphereGeometry args={[0.08, isMobile ? 8 : 16, isMobile ? 8 : 16]} />
           <meshBasicMaterial color="#2dd4bf" />
         </mesh>
       ))}
@@ -120,6 +143,16 @@ function LineChart3D() {
 }
 
 export default function HolographicDashboard() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 768px)');
+    setIsMobile(media.matches);
+    const listener = (e) => setIsMobile(e.matches);
+    media.addEventListener('change', listener);
+    return () => media.removeEventListener('change', listener);
+  }, []);
+
   return (
     <div className="relative w-full h-[320px] md:h-[400px] glass-panel rounded-2xl overflow-hidden glass-panel-glow border-teal-500/20">
       {/* Hologram scanlines effect */}
@@ -128,17 +161,23 @@ export default function HolographicDashboard() {
       {/* Floating 3D scene */}
       <Canvas
         camera={{ position: [0, 1.2, 4.5], fov: 50 }}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ 
+          antialias: !isMobile, 
+          alpha: true, 
+          powerPreference: 'high-performance' 
+        }}
+        dpr={isMobile ? [1, 1.2] : [1, 1.5]}
       >
         <ambientLight intensity={0.6} />
         <pointLight position={[5, 5, 5]} intensity={1} color="#60a5fa" />
-        <pointLight position={[-5, 5, -5]} intensity={0.5} color="#2dd4bf" />
+        {/* Secondary point light disabled on mobile to conserve performance */}
+        {!isMobile && <pointLight position={[-5, 5, -5]} intensity={0.5} color="#2dd4bf" />}
         <directionalLight position={[0, -5, 2]} intensity={0.4} color="#a78bfa" />
         
         <Float speed={2.5} rotationIntensity={0.3} floatIntensity={0.6}>
           <group position={[0, 0.2, 0]}>
-            <BarChart3D />
-            <LineChart3D />
+            <BarChart3D isMobile={isMobile} />
+            <LineChart3D isMobile={isMobile} />
           </group>
         </Float>
       </Canvas>

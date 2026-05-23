@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
-import Background3D from './components/Background3D';
 import Hero from './components/Hero';
 import About from './components/About';
 import Skills from './components/Skills';
@@ -8,11 +7,15 @@ import Projects from './components/Projects';
 import Experience from './components/Experience';
 import Contact from './components/Contact';
 
+const Background3D = lazy(() => import('./components/Background3D'));
+
 export default function App() {
   return (
     <div className="relative text-white min-h-screen bg-[#030712] font-sans selection:bg-teal-500/30 selection:text-white">
       {/* 3D Background canvas & static grid overlay */}
-      <Background3D />
+      <Suspense fallback={<div className="fixed inset-0 -z-50 w-full h-full bg-[#030712]" />}>
+        <Background3D />
+      </Suspense>
 
       {/* Floating Header */}
       <Navbar />

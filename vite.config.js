@@ -16,4 +16,18 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('three') || id.includes('@react-three') || id.includes('drei')) {
+            return 'three-bundle';
+          }
+          if (id.includes('framer-motion')) {
+            return 'framer-motion-bundle';
+          }
+        }
+      }
+    }
+  }
 })
