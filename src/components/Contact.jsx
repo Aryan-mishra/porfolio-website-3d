@@ -42,14 +42,23 @@ export default function Contact() {
     try {
       let response;
       if (isLocal) {
-        // Send to local Express backend
-        response = await fetch('/api/contact', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formState),
-        });
+        // Save to local storage to make the project purely frontend-runnable locally!
+        const existingMessages = JSON.parse(localStorage.getItem('portfolio_messages') || '[]');
+        const newMessage = {
+          id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+          name: formState.name,
+          email: formState.email,
+          subject: formState.subject || 'No Subject',
+          message: formState.message,
+          timestamp: new Date().toISOString()
+        };
+        existingMessages.push(newMessage);
+        localStorage.setItem('portfolio_messages', JSON.stringify(existingMessages, null, 2));
+
+        // Simulate network delay for premium visual feedback
+        await new Promise((resolve) => setTimeout(resolve, 800));
+
+        response = { ok: true };
       } else {
         // Send URL-encoded parameters to Netlify's root path
         const encode = (data) => {

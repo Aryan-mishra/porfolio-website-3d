@@ -1,16 +1,36 @@
-# React + Vite
+# Mishra Ji | AI-Powered Portfolio Website
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a premium, 3D holographic portfolio built with **React**, **Vite**, **Tailwind CSS**, and **Three.js** (via React Three Fiber).
 
-Currently, two official plugins are available:
+## Features
+- **Interactive 3D Backgrounds:** Procedurally generated orbiting rings, particles, and floating geometric shapes with dynamic mouse-movement parallax.
+- **Holographic Data Dashboard:** A real-time rendering 3D bar chart and curved line graph with digital scanlines and glowing overlay indicators.
+- **Micro-Animations:** Fluid scrolling reveals, timeline entry animations, and hover lighting effects.
+- **Autonomous Contact Uplink:** The contact form saves message records locally to `localStorage` when running in dev, and seamlessly binds to **Netlify Forms** in production. No backend server needed.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Prerequisites
+Make sure you have [Node.js](https://nodejs.org/) installed (v20+ recommended).
 
-## Expanding the ESLint configuration
+### 1. Install Dependencies
+Run the following command in the project directory:
+```bash
+npm install --legacy-peer-deps
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 2. Run the Development Server
+Launch the local dev environment:
+```bash
+npm run dev
+```
+Open **[http://localhost:5173](http://localhost:5173)** in your browser.
+
+### 3. Build for Production
+Compile the optimized static production bundle:
+```bash
+npm run build
+```
+The compiled frontend will be generated in the `dist/` directory, ready to be hosted on Netlify, Vercel, or GitHub Pages.
