@@ -125,17 +125,10 @@ body {
     radial-gradient(at 50% 100%, rgba(13, 148, 136, 0.05) 0px, transparent 50%);
 }
 
-/* 4D Slide Snapping Styles */
+/* 4D Slide Layout Styles */
 @media (min-width: 768px) {
-  html {
-    scroll-snap-type: y mandatory;
-    scroll-behavior: smooth;
-  }
-  
-  /* Make all main landing sections snap cleanly */
+  /* Keep premium full-viewport sizing and centering without snapping */
   section {
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -145,28 +138,4 @@ body {
     padding-top: 80px;
     padding-bottom: 40px;
   }
-}
-
-/* Slide Dots Navigation Sidebar */
-.slide-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  cursor: pointer;
-}
-
-.slide-dot:hover {
-  background-color: rgba(45, 212, 191, 0.6);
-  transform: scale(1.2);
-}
-
-.slide-dot.active {
-  width: 14px;
-  height: 14px;
-  background-color: #2dd4bf;
-  box-shadow: 0 0 12px #2dd4bf;
-  border-color: #2dd4bf;
 }

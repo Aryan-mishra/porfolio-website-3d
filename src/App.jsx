@@ -9,30 +9,6 @@ import Contact from './components/Contact';
 
 const Background3D = lazy(() => import('./components/Background3D'));
 
-function SlideNav({ activeSection }) {
-  const slides = [
-    { id: 'hero', name: 'Profile Start' },
-    { id: 'about', name: 'Executive Profile' },
-    { id: 'skills', name: 'Skill Matrix' },
-    { id: 'projects', name: 'Projects' },
-    { id: 'journey', name: 'Timeline' },
-    { id: 'contact', name: 'Contact' }
-  ];
-
-  return (
-    <div className="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col space-y-5 items-center">
-      {slides.map((slide) => (
-        <a
-          key={slide.id}
-          href={`#${slide.id}`}
-          title={slide.name}
-          className={`slide-dot ${activeSection === slide.id ? 'active' : ''}`}
-          aria-label={`Scroll to ${slide.name}`}
-        />
-      ))}
-    </div>
-  );
-}
 
 export default function App() {
   const [activeSection, setActiveSection] = useState('hero');
@@ -68,8 +44,6 @@ export default function App() {
       {/* Floating Header */}
       <Navbar />
 
-      {/* Slide dots indicator navigation */}
-      <SlideNav activeSection={activeSection} />
 
       {/* Main content sections */}
       <main className="md:pt-0 pt-20">
