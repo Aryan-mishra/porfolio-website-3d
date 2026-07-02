@@ -163,9 +163,19 @@ function FloatingShapes({ isMobile }) {
   );
 }
 
-function SceneContent({ isMobile }) {
+function SceneContent({ isMobile, activeSection }) {
   const sceneRef = useRef();
   const mouseRef = useRef({ x: 0, y: 0 });
+  const targetLookRef = useRef(new THREE.Vector3(0, 0, 0));
+
+  const sectionConfig = {
+    hero: { pos: [0, 0, 7], look: [0, 0, 0] },
+    about: { pos: [-3.2, 1.2, 5.0], look: [-4, 2, -2] },
+    skills: { pos: [3.5, -1.2, 4.5], look: [4.5, -2, -1] },
+    projects: { pos: [0, -1.5, 5.5], look: [0, 0, 0] },
+    journey: { pos: [-1.8, -2.2, 4.5], look: [-2.5, -3, -3] },
+    contact: { pos: [0, 0, 8.5], look: [0, 0, 0] },
+  };
 
   // Capture mouse movement at window level for parallax calculation
   useEffect(() => {
@@ -177,14 +187,26 @@ function SceneContent({ isMobile }) {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  useFrame(() => {
-    if (!sceneRef.current) return;
-    const targetX = mouseRef.current.x * 0.3;
-    const targetY = mouseRef.current.y * 0.3;
+  useFrame((state) => {
+    const config = sectionConfig[activeSection] || sectionConfig.hero;
     
-    // Smooth transition
-    sceneRef.current.rotation.y = THREE.MathUtils.lerp(sceneRef.current.rotation.y, targetX, 0.04);
-    sceneRef.current.rotation.x = THREE.MathUtils.lerp(sceneRef.current.rotation.x, -targetY, 0.04);
+    // Smoothly interpolate camera position
+    state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, config.pos[0], 0.05);
+    state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, config.pos[1], 0.05);
+    state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, config.pos[2], 0.05);
+
+    // Smoothly interpolate lookAt target
+    targetLookRef.current.x = THREE.MathUtils.lerp(targetLookRef.current.x, config.look[0], 0.05);
+    targetLookRef.current.y = THREE.MathUtils.lerp(targetLookRef.current.y, config.look[1], 0.05);
+    targetLookRef.current.z = THREE.MathUtils.lerp(targetLookRef.current.z, config.look[2], 0.05);
+    state.camera.lookAt(targetLookRef.current);
+
+    if (sceneRef.current) {
+      const targetX = mouseRef.current.x * 0.35;
+      const targetY = mouseRef.current.y * 0.35;
+      sceneRef.current.rotation.y = THREE.MathUtils.lerp(sceneRef.current.rotation.y, targetX, 0.04);
+      sceneRef.current.rotation.x = THREE.MathUtils.lerp(sceneRef.current.rotation.x, -targetY, 0.04);
+    }
   });
 
   return (
@@ -202,7 +224,7 @@ function SceneContent({ isMobile }) {
   );
 }
 
-export default function Background3D() {
+export default function Background3D({ activeSection }) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -224,7 +246,7 @@ export default function Background3D() {
         }}
         dpr={isMobile ? [1, 1.2] : [1, 1.5]}
       >
-        <SceneContent isMobile={isMobile} />
+        <SceneContent isMobile={isMobile} activeSection={activeSection} />
       </Canvas>
       {/* Background glow overlay */}
       <div className="absolute inset-0 bg-mesh opacity-80 pointer-events-none" />
