@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Stars, Float } from '@react-three/drei';
+import { Stars } from '@react-three/drei';
 import * as THREE from 'three';
 
 function Particles({ count = 100 }) {
@@ -58,107 +58,98 @@ function Particles({ count = 100 }) {
   );
 }
 
-function OrbitingRings({ isMobile }) {
-  const groupRef = useRef();
+function DNAHelix({ isMobile }) {
+  const helixRef = useRef();
+
+  // Procedural double helix generation
+  const { points1, points2, rungs } = useMemo(() => {
+    const p1 = [];
+    const p2 = [];
+    const r = [];
+    
+    const numPoints = isMobile ? 50 : 80;
+    const radius = 1.5;
+    const height = 12;
+    const turns = 3.5;
+
+    for (let i = 0; i < numPoints; i++) {
+      const fraction = i / numPoints;
+      const t = fraction * Math.PI * 2 * turns;
+      const y = fraction * height - height / 2;
+      
+      // Strand 1 position
+      const x1 = Math.sin(t) * radius;
+      const z1 = Math.cos(t) * radius;
+      p1.push(new THREE.Vector3(x1, y, z1));
+      
+      // Strand 2 position (offset by 180 degrees)
+      const x2 = Math.sin(t + Math.PI) * radius;
+      const z2 = Math.cos(t + Math.PI) * radius;
+      p2.push(new THREE.Vector3(x2, y, z2));
+
+      // Connect every second node with a horizontal base-pair rung
+      if (i % 2 === 0) {
+        r.push({
+          start: new THREE.Vector3(x1, y, z1),
+          end: new THREE.Vector3(x2, y, z2),
+        });
+      }
+    }
+    return { points1: p1, points2: p2, rungs: r };
+  }, [isMobile]);
 
   useFrame((state) => {
-    if (!groupRef.current) return;
+    if (!helixRef.current) return;
     const time = state.clock.getElapsedTime();
-    groupRef.current.rotation.x = time * 0.04;
-    groupRef.current.rotation.y = time * 0.06;
+    
+    // Slow, premium rotation over time (4D effect)
+    helixRef.current.rotation.y = time * 0.15;
+    helixRef.current.rotation.z = Math.sin(time * 0.2) * 0.05; // Gentle rocking
   });
 
   return (
-    <group ref={groupRef}>
-      {/* Primary Ring */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[3, 0.015, 8, isMobile ? 40 : 100]} />
-        <meshBasicMaterial color="#60a5fa" transparent opacity={0.2} />
-      </mesh>
-      
-      {/* Secondary Outer Ring */}
-      <mesh rotation={[Math.PI / 4, Math.PI / 4, 0]}>
-        <torusGeometry args={[4.5, 0.008, 6, isMobile ? 30 : 80]} />
-        <meshBasicMaterial color="#2dd4bf" transparent opacity={0.15} />
-      </mesh>
-      
-      {/* Tertiary Inner Ring - Disabled on Mobile to save vertex calculations */}
-      {!isMobile && (
-        <mesh rotation={[-Math.PI / 6, -Math.PI / 3, 0]}>
-          <torusGeometry args={[2.0, 0.01, 8, 60]} />
-          <meshBasicMaterial color="#a78bfa" transparent opacity={0.2} />
+    <group ref={helixRef}>
+      {/* Helix Strand 1 (Teal Nodes) */}
+      {points1.map((pos, idx) => (
+        <mesh key={`s1-${idx}`} position={pos}>
+          <sphereGeometry args={[isMobile ? 0.06 : 0.08, 8, 8]} />
+          <meshBasicMaterial color="#2dd4bf" transparent opacity={0.65} />
         </mesh>
-      )}
-    </group>
-  );
-}
+      ))}
 
-function FloatingShapes({ isMobile }) {
-  // Common material wrapper to replace expensive refraction on mobile
-  const ShapeMaterial = ({ color, emissive, opacity }) => {
-    if (isMobile) {
-      return (
-        <meshStandardMaterial
-          color={color}
-          emissive={emissive}
-          emissiveIntensity={0.1}
-          roughness={0.2}
-          metalness={0.7}
-          transparent
-          opacity={opacity + 0.1}
-        />
-      );
-    }
-    return (
-      <meshPhysicalMaterial
-        color={color}
-        emissive={emissive}
-        emissiveIntensity={0.15}
-        roughness={0.1}
-        metalness={0.8}
-        transparent
-        opacity={opacity}
-        transmission={0.6}
-        thickness={0.5}
-      />
-    );
-  };
-
-  return (
-    <group>
-      {/* Floating Tetrahedron */}
-      <Float speed={1.5} rotationIntensity={1} floatIntensity={0.8} position={[-4, 2, -2]}>
-        <mesh>
-          <tetrahedronGeometry args={[0.5]} />
-          <ShapeMaterial color="#2dd4bf" emissive="#0d9488" opacity={0.25} />
+      {/* Helix Strand 2 (Indigo/Purple Nodes) */}
+      {points2.map((pos, idx) => (
+        <mesh key={`s2-${idx}`} position={pos}>
+          <sphereGeometry args={[isMobile ? 0.06 : 0.08, 8, 8]} />
+          <meshBasicMaterial color="#818cf8" transparent opacity={0.65} />
         </mesh>
-      </Float>
+      ))}
 
-      {/* Floating Octahedron */}
-      <Float speed={1.2} rotationIntensity={1.5} floatIntensity={1} position={[4.5, -2, -1]}>
-        <mesh>
-          <octahedronGeometry args={[0.4]} />
-          <ShapeMaterial color="#60a5fa" emissive="#2563eb" opacity={0.2} />
-        </mesh>
-      </Float>
+      {/* Rungs (Base Connections) */}
+      {rungs.map((rung, idx) => {
+        const distance = rung.start.distanceTo(rung.end);
+        const position = new THREE.Vector3()
+          .addVectors(rung.start, rung.end)
+          .multiplyScalar(0.5);
+        
+        const direction = new THREE.Vector3()
+          .subVectors(rung.end, rung.start)
+          .normalize();
+          
+        const quaternion = new THREE.Quaternion()
+          .setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
 
-      {/* Floating Icosahedron - Disabled on Mobile */}
-      {!isMobile && (
-        <Float speed={2} rotationIntensity={0.8} floatIntensity={1.2} position={[-2.5, -3, -3]}>
-          <mesh>
-            <icosahedronGeometry args={[0.35]} />
-            <meshPhysicalMaterial
-              color="#a78bfa"
-              emissive="#7c3aed"
-              emissiveIntensity={0.2}
-              roughness={0.15}
-              transparent
-              opacity={0.25}
-              transmission={0.8}
-            />
+        return (
+          <mesh 
+            key={`r-${idx}`} 
+            position={position}
+            quaternion={quaternion}
+          >
+            <cylinderGeometry args={[0.012, 0.012, distance, 6]} />
+            <meshBasicMaterial color="#60a5fa" transparent opacity={0.25} />
           </mesh>
-        </Float>
-      )}
+        );
+      })}
     </group>
   );
 }
@@ -168,13 +159,14 @@ function SceneContent({ isMobile, activeSection }) {
   const mouseRef = useRef({ x: 0, y: 0 });
   const targetLookRef = useRef(new THREE.Vector3(0, 0, 0));
 
+  // Dynamic camera configurations for viewport snapping
   const sectionConfig = {
-    hero: { pos: [0, 0, 7], look: [0, 0, 0] },
-    about: { pos: [-3.2, 1.2, 5.0], look: [-4, 2, -2] },
-    skills: { pos: [3.5, -1.2, 4.5], look: [4.5, -2, -1] },
-    projects: { pos: [0, -1.5, 5.5], look: [0, 0, 0] },
-    journey: { pos: [-1.8, -2.2, 4.5], look: [-2.5, -3, -3] },
-    contact: { pos: [0, 0, 8.5], look: [0, 0, 0] },
+    hero: { pos: [0, 0.5, 6], look: [0, 0, 0] },
+    about: { pos: [-3.2, 0.8, 4.8], look: [-1.2, 0.2, 0] },
+    skills: { pos: [3.2, -0.8, 4.8], look: [1.2, -0.2, 0] },
+    projects: { pos: [0, -2.5, 4.5], look: [0, -2.0, 0] },
+    journey: { pos: [-2.2, -3.2, 5.0], look: [-1.2, -2.5, 0] },
+    contact: { pos: [0, 0, 9.0], look: [0, 0, 0] },
   };
 
   // Capture mouse movement at window level for parallax calculation
@@ -211,13 +203,12 @@ function SceneContent({ isMobile, activeSection }) {
 
   return (
     <group ref={sceneRef}>
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[5, 8, 5]} intensity={1.2} color="#60a5fa" />
+      <ambientLight intensity={0.55} />
+      <directionalLight position={[5, 8, 5]} intensity={1.5} color="#2dd4bf" />
       {/* Secondary light disabled on mobile to conserve performance */}
-      {!isMobile && <pointLight position={[-8, -8, -5]} intensity={0.6} color="#2dd4bf" />}
+      {!isMobile && <pointLight position={[-8, -8, -5]} intensity={0.8} color="#818cf8" />}
       
-      <OrbitingRings isMobile={isMobile} />
-      <FloatingShapes isMobile={isMobile} />
+      <DNAHelix isMobile={isMobile} />
       <Particles count={isMobile ? 35 : 120} />
       <Stars radius={100} depth={50} count={isMobile ? 250 : 1200} factor={isMobile ? 3 : 4} saturation={0.5} fade speed={isMobile ? 0.4 : 0.8} />
     </group>

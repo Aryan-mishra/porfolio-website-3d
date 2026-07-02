@@ -6,7 +6,6 @@ import Skills from './components/Skills';
 import Projects from './components/Projects';
 import Experience from './components/Experience';
 import Contact from './components/Contact';
-import HotelDemo from './components/HotelDemo';
 
 const Background3D = lazy(() => import('./components/Background3D'));
 
@@ -36,19 +35,9 @@ function SlideNav({ activeSection }) {
 }
 
 export default function App() {
-  const [currentView, setCurrentView] = useState('portfolio');
   const [activeSection, setActiveSection] = useState('hero');
 
   useEffect(() => {
-    // Check url search query for state synchronization
-    if (window.location.search.includes('demo=hotel')) {
-      setCurrentView('hotel');
-    }
-  }, []);
-
-  useEffect(() => {
-    if (currentView !== 'portfolio') return;
-
     const sections = document.querySelectorAll('section[id]');
     const observerOptions = {
       root: null,
@@ -67,21 +56,7 @@ export default function App() {
 
     sections.forEach((section) => observer.observe(section));
     return () => observer.disconnect();
-  }, [currentView]);
-
-  const handleSwitchToHotel = () => {
-    setCurrentView('hotel');
-    window.history.pushState(null, '', '?demo=hotel');
-  };
-
-  const handleSwitchToPortfolio = () => {
-    setCurrentView('portfolio');
-    window.history.pushState(null, '', window.location.pathname);
-  };
-
-  if (currentView === 'hotel') {
-    return <HotelDemo onBack={handleSwitchToPortfolio} />;
-  }
+  }, []);
 
   return (
     <div className="relative text-white min-h-screen bg-[#030712] font-sans selection:bg-teal-500/30 selection:text-white">
@@ -95,20 +70,6 @@ export default function App() {
 
       {/* Slide dots indicator navigation */}
       <SlideNav activeSection={activeSection} />
-
-      {/* Floating 3D Hotel Pitch CTA */}
-      <div className="fixed bottom-6 left-6 z-40">
-        <button 
-          onClick={handleSwitchToHotel}
-          className="flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black text-xs font-mono font-bold uppercase tracking-widest px-4 py-3 rounded-full shadow-lg shadow-amber-500/25 hover:scale-105 transition-all duration-300 pointer-events-auto cursor-pointer"
-        >
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-black"></span>
-          </span>
-          <span>🏨 View 3D Hotel Pitch</span>
-        </button>
-      </div>
 
       {/* Main content sections */}
       <main className="md:pt-0 pt-20">
